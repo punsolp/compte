@@ -1,0 +1,57 @@
+import discord
+import pandas as pd
+from datetime import datetime
+
+
+client = discord.Client()
+
+
+@client.event
+async def on_message(message):
+    if message.content.startswith('/compte'):
+        # Extrait la date précisé après la commande
+        date_str = message.content.split()[1]
+        date = datetime.strptime(date_str, '%d/%m/%Y')
+
+        # sélection du channel
+        channel = client.get_channel('channel_id_here')
+
+        # récupère les messages après la date
+        messages = await channel.history(after=date).flatten()
+
+        data = []
+        for message in messages:
+            # Découpe le messsage via les espaces
+            parts = message.content.split()
+
+            # Extrait les valeurs des deux premiers mots (résultat du cbt et nom de l'alliance)
+            Résultat = parts[0]
+            Alliance = parts[1]
+
+            # Extrait les id des membres mentionnées
+            mentions = message.mentions
+
+            # Assignation des id des membres
+            membre1, membre2, membre3, membre4, membre5 = [m.id if len(mentions) > i else 0 for i, m in enumerate(mentions[:5])]
+
+            # détermine les points en fonction de résultat (on peut rajouter en fonction d'alliance)
+            if Résultat == 'WP':
+                points = 5
+            else:
+                points = 0
+
+            # Alimente la liste
+            data.append({'id': message.id, 'Résultat': Résultat, 'Alliance': Alliance, 'points': points, '1': membre1, '2': membre2, '3': membre3, '4': membre4, '5': membre5})
+
+        # Create a pandas DataFrame from the data
+        df = pd.DataFrame(data)
+
+        # rename
+        df = df.rename(columns={'Résultat': 'Résultat', 'Alliance': 'Alliance', 'points': 'points'})
+
+        # export excel, a voir pour alimenter base sql 
+        df.to_excel('extracted_data.xlsx', index=False)
+
+        await message.channel.send("Les données ont été exportées vers le fichier extracted_data.xlsx.")
+
+client.run('your_token_here')
