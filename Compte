@@ -14,7 +14,7 @@ async def on_message(message):
         date = datetime.strptime(date_str, '%d/%m/%Y')
 
         # sélection du channel
-        channel = client.get_channel('channel_id_here')
+        channel = client.get_channel('1093555236792180757')
 
         # récupère les messages après la date
         messages = await channel.history(after=date).flatten()
